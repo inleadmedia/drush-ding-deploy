@@ -76,6 +76,7 @@ function ding_deploy_drush_command() {
       'no-post-updb' => "Don't run post update commands",
       'code-only' => "Alias for --no-offline --no-dump --no-updb --no-post-updb. Useful for first deployment and when you know there's no need for a full deployment",
       'working-copy' => 'Create checkouts when possible',
+      'ding2-dev' => 'if ding2_utils is available strip tags and revisions',
     ),
     'examples' => array(
       'drush @staging --build-path=/home/deploy/build ding-deploy' => 'Deploy to the staging server.',
@@ -111,6 +112,7 @@ function ding_deploy_drush_command() {
       'profile-branch' => 'Checkout branch instead of master',
       'profile-tag' => 'Checkout specific tag',
       'working-copy' => 'Create checkouts when possible',
+      'ding2-dev' => 'if ding2_utils is available strip tags and revisions',
     ),
     'examples' => array(
       'drush @dev ding-build /var/www/drupal-7.x' => 'Build ding in the specified dir.',
@@ -611,7 +613,7 @@ function drush_ding_deploy() {
 
     drush_set_context('DING_DEPLOY_STAGE', 'updb');
     if (!drush_get_option('no-updb', FALSE)) {
-      drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_FULL);
+      drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_DATABASE);
       $res2 = drush_invoke_process($settings, 'updb');
       if (!$res2 || $res2['error_status'] != 0) {
         drush_set_error('UPDB_FAILED');
