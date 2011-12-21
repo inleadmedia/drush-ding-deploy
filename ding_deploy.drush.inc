@@ -600,11 +600,10 @@ function drush_ding_deploy() {
 
       if (!drush_get_option('no-symlink', FALSE)) {
         $root = drush_get_option('root', NULL);
-        if (file_exists($root . '/profiles/' . $build_profile)) {
-          drush_shell_exec('rm ' . $root. '/profiles/' . $build_profile);
+        if (!file_exists($root . '/profiles/' . $build_profile)) {
+          symlink($build_path . '/' . $prefix . '-latest', $root. '/profiles/' . $build_profile);
+          drush_log('Created ' . $build_profile . ' profile symlinks.');
         }
-        symlink($build_path . '/' . $prefix . '-latest', $root. '/profiles/' . $build_profile);
-        drush_log('Created/updated ' . $build_profile . ' profile symlinks.');
       }
 
     }
