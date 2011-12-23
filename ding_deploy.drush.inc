@@ -395,12 +395,11 @@ function drush_ding_deploy_setup() {
       }
 
       $basename = basename($root);
-      $options = array('--drupal-project-rename=' . $basename, 'drupal');
+      $cmd_options = array('--drupal-project-rename=' . $basename,);
       $cwd = getcwd();
       drush_op('chdir', dirname($root));
       // @todo add in profile-core-version
-      // @todo should use drush_invoke_process.
-      $res = drush_backend_invoke_args('dl', $options);
+      $res = drush_invoke_process('@self', 'dl', array('drupal'), $cmd_options);
       if ($res['error_status'] == 0) {
       }
       else {
