@@ -874,3 +874,6 @@ function _parse_info_file($filename) {
   return $info;
 }
 
+function drush_ding_deploy_version() {
+  return '1.0.0-dev';
+}
