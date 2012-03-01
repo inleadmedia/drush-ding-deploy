@@ -491,6 +491,12 @@ function drush_ding_deploy_build($path = NULL) {
   if (drush_get_option('ding2-dev', FALSE)) {
     $settings['ding2-dev'] = TRUE;
   }
+  if ($dbc_option = drush_get_option('dbc-modules', FALSE)) {
+    $settings['dbc-modules'] = $dbc_option;
+  }
+  if ($dbc_option = drush_get_option('dbc-github-org', FALSE)) {
+    $settings['dbc-github-org'] = $dbc_option;
+  }
   // TODO: This can quietly fail if a makefile specifies an
   // non-existant contrib module version?
   $res = drush_invoke_process($settings, 'make', array($makefile, $path), $settings);
