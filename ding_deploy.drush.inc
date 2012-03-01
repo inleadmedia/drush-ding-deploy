@@ -481,16 +481,10 @@ function drush_ding_deploy_build($path = NULL) {
   }
 
   // Copy alias/settings/command line options to settings.
-  $settings = array(
-    'no-core' => TRUE,
-    'contrib-destination' => '.'
-  );
-  if (drush_get_option('working-copy', FALSE)) {
-    $settings['working-copy'] = TRUE;
-  }
-  if (drush_get_option('ding2-dev', FALSE)) {
-    $settings['ding2-dev'] = TRUE;
-  }
+  $settings = drush_redispatch_get_options();
+  $settings['no-core'] = TRUE;
+  $settings['contrib-destination'] = '.';
+
   // TODO: This can quietly fail if a makefile specifies an
   // non-existant contrib module version?
   $res = drush_invoke_process($settings, 'make', array($makefile, $path), $settings);
