@@ -82,31 +82,35 @@ Usage
 
 Using an aliases file, you can use the following commands:
 
-drush ding-deploy-install @prod
+`drush ding-deploy-install @prod`
 
 Installs the deploy script in ~/.drush of the remote user.
 
-drush @prod ding-deploy-setup
+
+`drush @prod ding-deploy-setup`
 
 Ensures that the build directory exists, downloads the bootstrap make
 file, installs Drupal to the root path if it doesn't exists (unless
 overridden with --no-core), and creates a symlink in the profiles
 directory to the build directory (unless overridden by --no-symlink).
 
-drush @prod ding-deploy --code-only
+
+`drush @prod ding-deploy --code-only`
 
 Deploys to the site. Runs the bootstrap make file and symlinks the new
 build into the site. The --code-only is needed when there isn't a
 running site yet.
 
-drush @prod ding-deploy
+
+`drush @prod ding-deploy`
 
 Deploys, sets the site offline, makes a database dump and moves the
 new build into place. Then it runs updb and additional commands before
 setting the site online again. If any of this fails, the entire
 deployment is rolled back.
 
-drush ding-deploy-build @local testbuild
+
+`drush ding-deploy-build @local testbuild`
 
 Builds from the specified profile into
 testbuild/profiles/<profile>. This command is not supposed to be used
