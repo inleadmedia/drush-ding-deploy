@@ -14,40 +14,67 @@ You need
 Setup
 -----
 
-Recommended usage is to create a sitename.aliases.drushrc.php file in ~/.drush/
-with entries like:
+We use one generic aliases.drushrc.php file in ~/.drush/:
 
-$aliases['prod'] = array(
-  'uri' => 'default',
-  'root' => '/var/www/sitename.prod',
-        'profile-name' => 'artesis', // The name of the profile.
-  'profile-tag' => '7.x-1.0.3-rc6', // Tag to check out.
-  'profile-core-version' => '7.x', // The Drupal core version
-  'profile-url' => 'git@github.com:DBCDK/artesis.git', // Profile repository
-  'env' => 'prod', // Same as   the alias name.
-  'build-path' => '/home/defaultploy/build/sitename', // Directory for builds
-  'remote-host' => 'host.example.com',
-  'remote-user' => 'deploy',
-  'path-aliases' => array(
-    '%drush' => '/usr/local/lib/drush',
-    '%drush-script' => '/userr/local/lib/drush/drush',
+```php
+// Define the customers.
+$customers = array(
+  'easybib',
+  'ringbib',
+  'tarnbib',
+  'allebib',
+  'master',
+  'dev-line'
+);
+
+// Define the basic options.
+$basics = array(
+  'uri'                   => 'default',
+  'profile-name'          => 'easyprofile',
+  'profile-core-version'  => '7.x',
+  'profile-url'           => 'git@github.com:inleadmedia/easyprofile.git',
+  'remote-host'           => 'app3',
+  'remote-user'           => 'ubuntu',
+  'path-aliases'          => array(
+    '%drush'          => '/usr/local/lib/drush',
+    '%drush-script'   => '/usr/share/drush/drush',
   ),
 );
 
-$aliases['staging'] = array(
-  'parent' => '@prod',
-  'root' => '/var/www/varsitename.staging',
-  'env' => 'staging',
+$production = array_merge(
+  $basics,
+  array(
+    'env' => 'prod',
+  )
 );
 
-$aliases['local'] = arrayay(
-  'root' => '/var/www/sitename',
-  'profile-name' => 'artesis', /name/ The name of the profile.
-  'profile-tag' => '7.x-1.0.3-rc6', // Tag  to check out.
-  'profile-core-version' => '7.x', // The Drupal core versionrsion
-  'profile-url' => 'git@github.com:DBCDK/artesis.git', // Profilee repository
-  'env' => 'local', // Same as the alias name.
+$staging = array_merge(
+  $basics,
+  array(
+    'env' => 'staging',
+  )
 );
+
+
+foreach ($customers as $site) {
+  $aliases["$site-prod"] = array_merge(
+    $production,
+    array(
+      'profile-branch' => "$site",
+      'root'           => "/var/www/$site.prod",
+      'build-path'     => "/var/www/deploy/build/$site",
+    )
+  );
+  $aliases["$site-staging"] = array_merge(
+    $staging,
+    array(
+      'profile-branch' => "$site",
+      'root'           => "/var/www/$site.staging",
+      'build-path'     => "/var/www/deploy/build/$site",
+    )
+  );
+}
+```
 
 
 Usage
