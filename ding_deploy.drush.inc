@@ -7,16 +7,6 @@
 
 define('DING_DEPLOY_GIT_REPO', 'https://github.com/dingproject/drush-ding-deploy.git');
 
-define('BOOTSTRAP_MAKE','api = 2
-core = @core-version
-
-projects[] = drupal
-
-projects[@name][type] = "profile"
-projects[@name][download][type] = "@type"
-projects[@name][download][url] = "@url"
-');
-
 /**
  * Implements hook_drush_command().
  */
