@@ -76,6 +76,7 @@ function ding_deploy_drush_command() {
       'no-post-updb' => "Don't run post update commands",
       'code-only' => "Alias for --no-offline --no-dump --no-updb --no-post-updb. Useful for first deployment and when you know there's no need for a full deployment",
       'working-copy' => 'Create checkouts when possible',
+      'core-patches' => 'Lists patches delimited by comma that have to be applied to Drupal\'s core',
     ),
     'examples' => array(
       'drush @staging --build-path=/home/deploy/build ding-deploy' => 'Deploy to the staging server.',
@@ -442,14 +443,31 @@ function drush_ding_deploy_build($path = NULL) {
   $profile_url = drush_get_option('profile-url', NULL);
   $profile_branch = drush_get_option('profile-branch', NULL);
   $profile_tag = drush_get_option('profile-tag', NULL);
+  $profile_patches = drush_get_option('core-patches', NULL);
 
-  $makefile_content = strtr(BOOTSTRAP_MAKE, array('@core-version' => $profile_core_version, '@name' => $profile, '@type' => $profile_type, '@url' => $profile_url));
+  // Build the make file using parameters.
+  $makefile_content =
+    "api = 2\n"
+    . "core = $profile_core_version\n"
+    . "projects[drupal][type] = core\n"
+    . "projects[$profile][type] = \"profile\"\n"
+    . "projects[$profile][download][type] = \"$profile_type\"\n"
+    . "projects[$profile][download][url] = \"$profile_url\"\n";
+
   if ($profile_branch) {
-    $makefile_content .= strtr('projects[@name][download][branch] = "@branch"' . "\n", array('@name' => $profile, '@branch' => $profile_branch));
+    $makefile_content .= "projects[$profile][download][branch] = \"$profile_branch\"\n";
   }
   if ($profile_tag) {
-    $makefile_content .= strtr('projects[@name][download][tag] = "@tag"' . "\n", array('@name' => $profile, '@tag' => $profile_tag));
+    $makefile_content .= "projects[$profile][download][tag] = \"$profile_tag\"\n";
   }
+
+  if ($profile_patches) {
+    $patches = explode(',', $profile_patches);
+    foreach ($patches as $patch) {
+      $makefile_content .= "projects[drupal][patch][] = " . trim($patch) . "\n";
+    }
+  }
+
   $makefile = drush_save_data_to_temp_file($makefile_content);
 
   if (!$path) {
@@ -482,7 +500,10 @@ function drush_ding_deploy_build($path = NULL) {
 
   // Copy alias/settings/command line options to settings.
   $settings = drush_redispatch_get_options();
-  $settings['no-core'] = TRUE;
+  // Need core option to apply patches if any.
+  if (!$profile_patches) {
+    $settings['no-core'] = TRUE;
+  }
   $settings['contrib-destination'] = '.';
 
   // TODO: This can quietly fail if a makefile specifies an
@@ -490,7 +511,7 @@ function drush_ding_deploy_build($path = NULL) {
   $res = drush_invoke_process($settings, 'make', array($makefile, $path), $settings);
 
   var_dump($res);
-  
+
   if (isset($old_cwd)) {
     chdir($old_cwd);
   }
