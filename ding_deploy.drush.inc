@@ -102,6 +102,7 @@ function ding_deploy_drush_command() {
       'profile-branch' => 'Checkout branch instead of master',
       'profile-tag' => 'Checkout specific tag',
       'working-copy' => 'Create checkouts when possible',
+      'ding2-dev' => 'if ding2_utils is available strip tags and revisions',
     ),
     'examples' => array(
       'drush @dev ding-build /var/www/drupal-7.x' => 'Build ding in the specified dir.',
@@ -384,12 +385,11 @@ function drush_ding_deploy_setup() {
       }
 
       $basename = basename($root);
-      $options = array('--drupal-project-rename=' . $basename, 'drupal');
+      $cmd_options = array('--drupal-project-rename=' . $basename,);
       $cwd = getcwd();
       drush_op('chdir', dirname($root));
       // @todo add in profile-core-version
-      // @todo should use drush_invoke_process.
-      $res = drush_backend_invoke_args('dl', $options);
+      $res = drush_invoke_process('@self', 'dl', array('drupal'), $cmd_options);
       if ($res['error_status'] == 0) {
       }
       else {
@@ -608,11 +608,10 @@ function drush_ding_deploy() {
 
       if (!drush_get_option('no-symlink', FALSE)) {
         $root = drush_get_option('root', NULL);
-        if (file_exists($root . '/profiles/' . $build_profile)) {
-          drush_shell_exec('rm ' . $root. '/profiles/' . $build_profile);
+        if (!file_exists($root . '/profiles/' . $build_profile)) {
+          symlink($build_path . '/' . $prefix . '-latest', $root. '/profiles/' . $build_profile);
+          drush_log('Created ' . $build_profile . ' profile symlinks.');
         }
-        symlink($build_path . '/' . $prefix . '-latest', $root. '/profiles/' . $build_profile);
-        drush_log('Created/updated ' . $build_profile . ' profile symlinks.');
       }
 
     }
@@ -620,7 +619,7 @@ function drush_ding_deploy() {
 
     drush_set_context('DING_DEPLOY_STAGE', 'updb');
     if (!drush_get_option('no-updb', FALSE)) {
-      drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_FULL);
+      drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_DATABASE);
       $res2 = drush_invoke_process($settings, 'updb');
       if (!$res2 || $res2['error_status'] != 0) {
         drush_set_error('UPDB_FAILED');
