@@ -496,11 +496,16 @@ function drush_ding_deploy_build($path = NULL) {
   }
   $settings['contrib-destination'] = '.';
 
-  // TODO: This can quietly fail if a makefile specifies an
-  // non-existant contrib module version?
   $res = drush_invoke_process($settings, 'make', array($makefile, $path), $settings);
-
-  var_dump($res);
+  // Show any errors that might happend during make if debug was enabled. 
+  if ($settings['debug']) {
+    drush_log("-----------------------------");
+    drush_log("--- Drush make extra log ----");
+    drush_log("-----------------------------");
+    drush_log(print_r($res, TRUE));
+    drush_log("--------- End of log --------");
+    drush_log("-----------------------------");
+  }
 
   if (isset($old_cwd)) {
     chdir($old_cwd);
@@ -558,8 +563,6 @@ function drush_ding_deploy() {
     $settings['working-copy'] = TRUE;
   }
   $res = drush_invoke_process($settings, 'ding-deploy-build', array($build_path . '/' . $build_dir), $settings);
-
-  var_dump($res);
 
   $settings = drush_get_merged_options();
   if ($res['error_status'] == 0) {
