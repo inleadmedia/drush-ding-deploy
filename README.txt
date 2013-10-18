@@ -6,7 +6,7 @@ This is a standard deployment script for Ding.
 Important
 ---------
 
-You need 
+You need
 
 * [Drush](http://drupal.org/project/drush) version >= 4.5
 * [Drush_make](http://drupal.org/project/drush_make) version >= 2.3
@@ -40,7 +40,7 @@ $aliases['staging'] = array(
   'env' => 'staging',
 );
 
-$aliases['local'] = arrayay(
+$aliases['local'] = array(
   'root' => '/var/www/sitename',
   'profile-name' => 'artesis', /name/ The name of the profile.
   'profile-tag' => '7.x-1.0.3-rc6', // Tag  to check out.
@@ -48,7 +48,6 @@ $aliases['local'] = arrayay(
   'profile-url' => 'git@github.com:DBCDK/artesis.git', // Profilee repository
   'env' => 'local', // Same as the alias name.
 );
-
 
 Usage
 -----
