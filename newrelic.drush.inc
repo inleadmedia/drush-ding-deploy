@@ -9,16 +9,26 @@
  */
 function newrelic_ding_deploy_complete($dir) {
   $options = drush_get_merged_options();
-  $profile = drush_get_option('profile-name');
+  if (!empty($options['newrelic'])) {
+    $newrelic_settings = unserialize($options['newrelic']);
+  }
+  else {
+    $alias = drush_sitealias_get_record($options['#name']);
+    $newrelic_settings = $alias['newrelic'];
+  }
 
-  $alias = drush_sitealias_get_record($options['#name']);
+  if (!empty($options['profile-tag'])) {
+    $version = $options['profile-tag'];
+  }
+  else {
+    $profile = drush_get_option('profile-name');
+    $info_file = $dir . '/profiles/' . $profile . '/' . $profile . '.info';
+    $info = _parse_info_file($info_file);
+    $version = $info['version'];
+  }
 
-  $newrelic_settings = $alias['newrelic'];
+  $newrelic_settings['description'] = 'Deploying ' . $version;
 
-  $info_file = $dir . '/profiles/' . $profile . '/' . $profile . '.info';
-  $info = _parse_info_file($info_file);
-
-  $newrelic_settings['description'] = 'Deploying ' . $info['version'];
   _newrelic_send_info($newrelic_settings);
 }
 
