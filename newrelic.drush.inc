@@ -43,7 +43,7 @@ function _newrelic_send_info($data) {
     return;
   }
 
-  $command = 'curl -H "x-api-key:' . $data['api-key'] . '"';
+  $command = '/usr/bin/curl -H "x-api-key:' . $data['api-key'] . '"';
   $command .= ' -d "deployment[description]=' . $data['description'] . '"';
 
   if (!empty($data['application_id'])) {
