@@ -9,60 +9,27 @@
  */
 function newrelic_ding_deploy_complete($dir) {
   $options = drush_get_merged_options();
-  $env = drush_get_option('env');
-  $profile = drush_get_option('profile-name');
-  $newrelic_settings = _newrelic_settings($options['#name'], $env);
+  if (!empty($options['newrelic'])) {
+    $newrelic_settings = unserialize($options['newrelic']);
+  }
+  else {
+    $alias = drush_sitealias_get_record($options['#name']);
+    $newrelic_settings = $alias['newrelic'];
+  }
 
-  $info_file = $dir . '/profiles/' . $profile . '/' . $profile . '.info';
-  $info = _parse_info_file($info_file);
+  if (!empty($options['profile-tag'])) {
+    $version = $options['profile-tag'];
+  }
+  else {
+    $profile = drush_get_option('profile-name');
+    $info_file = $dir . '/profiles/' . $profile . '/' . $profile . '.info';
+    $info = _parse_info_file($info_file);
+    $version = $info['version'];
+  }
 
-  $newrelic_settings['description'] = 'Deploying ' . $info['version'];
+  $newrelic_settings['description'] = 'Deploying ' . $version;
+
   _newrelic_send_info($newrelic_settings);
-}
-
-/**
- * Read settings from newrelic.drushrc.php.
- *
- * @param string $profile
- *   Profile name.
- * @param string $env
- *   Environment.
- *
- * @return array
- *   New Relic settings.
- */
-function _newrelic_settings($profile, $env) {
-  // Get newrelic settings from alias_path.
-  $alias_path = drush_sitealias_alias_path();
-  $newrelic_settings = array();
-  foreach ($alias_path as $path) {
-    $file = realpath($path . '/newrelic.drushrc.php');
-    if (file_exists($file)) {
-      include $file;
-      $newrelic_settings = array_merge($newrelic_settings, $newrelic);
-      unset($newrelic);
-    }
-  }
-
-  $profile = str_replace('@', '', $profile);
-
-  $settings = array(
-    'api-key' => $newrelic_settings['api-key'],
-    'user' => $newrelic_settings['user'],
-  );
-
-  // Site settings.
-  $site_profile = str_replace('-' . $env, '', $profile);
-  if (!empty($newrelic_settings['profiles'][$site_profile])) {
-    $settings = array_merge($settings, $newrelic_settings['profiles'][$site_profile]);
-  }
-
-  // Env specific site settings.
-  if (!empty($newrelic_settings['profiles'][$profile])) {
-    $settings = array_merge($settings, $newrelic_settings['profiles'][$profile]);
-  }
-
-  return $settings;
 }
 
 /**
@@ -76,7 +43,7 @@ function _newrelic_send_info($data) {
     return;
   }
 
-  $command = 'curl -H "x-api-key:' . $data['api-key'] . '"';
+  $command = '/usr/bin/curl -H "x-api-key:' . $data['api-key'] . '"';
   $command .= ' -d "deployment[description]=' . $data['description'] . '"';
 
   if (!empty($data['application_id'])) {
