@@ -1,0 +1,25 @@
+Add the following variables to the aliases.drushrc.php
+
+$newrelic = array(
+  'api-key' => 'my key',
+  'user' => 'global deploy user',
+);
+
+$newrelic_sites = array(
+  'site-prod' => array(
+    'application_id' => 'respective app id',
+  ),
+  'site-staging' => array(
+    'app_name' => 'application name',
+  ),
+);
+
+just before:
+
+// Define aliases.
+foreach ($customers as $site => $project) {
+  ...
+
+and the following 2 lines before same foreach loop closes.
+  $aliases["$site-prod"]['newrelic'] = array_merge($newrelic, $newrelic_sites[$site.'-prod']);
+  $aliases["$site-staging"]['newrelic'] = array_merge($newrelic, $newrelic_sites[$site.'-staging']);

@@ -1,13 +1,12 @@
 <?php
-
 /**
  * @file
- *   Ding deployment functions.
+ * Ding deployment functions.
  */
 
-define('DING_DEPLOY_GIT_REPO', 'https://github.com/dingproject/drush-ding-deploy.git');
+define('DING_DEPLOY_GIT_REPO', 'https://github.com/inleadmedia/drush-ding-deploy.git');
 
-define('BOOTSTRAP_MAKE','api = 2
+define('BOOTSTRAP_MAKE', 'api = 2
 core = @core-version
 
 projects[] = drupal
@@ -548,8 +547,6 @@ function drush_ding_deploy() {
   }
   $res = drush_invoke_process($settings, 'ding-deploy-build', array($build_path . '/' . $build_dir), $settings);
 
-  var_dump($res);
-
   $settings = drush_get_merged_options();
   if ($res['error_status'] == 0) {
     drush_set_context('DING_DEPLOY_STAGE', 'offline');
@@ -584,7 +581,7 @@ function drush_ding_deploy() {
     foreach ($contents as $build_profile) {
 
       $prefix = $env;
-      if (sizeof($contents) > 1) {
+      if (count($contents) > 1) {
         $prefix = $env . '-' . $build_profile;
       }
       if (file_exists($prefix . '-previous')) {
@@ -598,9 +595,9 @@ function drush_ding_deploy() {
       if (!drush_get_option('no-symlink', FALSE)) {
         $root = drush_get_option('root', NULL);
         if (file_exists($root . '/profiles/' . $build_profile)) {
-          drush_shell_exec('rm ' . $root. '/profiles/' . $build_profile);
+          drush_shell_exec('rm ' . $root . '/profiles/' . $build_profile);
         }
-        symlink($build_path . '/' . $prefix . '-latest', $root. '/profiles/' . $build_profile);
+        symlink($build_path . '/' . $prefix . '-latest', $root . '/profiles/' . $build_profile);
         drush_log('Created/updated ' . $build_profile . ' profile symlinks.');
       }
 
@@ -662,6 +659,8 @@ function drush_ding_deploy() {
       @drush_op('unlink', $env . '-' . $build_profile . '-previous-bak');
     }
     drush_op('chdir', $cwd);
+    // Let other modules know that the build completed successfully.
+    drush_command_invoke_all('ding_deploy_complete', $build_path . '/' . $build_dir);
   }
   else {
     drush_set_error('MAKE_FAILED');
